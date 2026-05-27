@@ -29,7 +29,7 @@ jobs:
       
     - name: Download GitHubDesktop2Chinese.exe
       shell: pwsh
-      run: Invoke-WebRequest -Uri "https://github.com/cngege/GitHubDesktop2Chinese/releases/latest/download/GitHubDesktop2Chinese.exe" -OutFile "${{github.workspace}}\GitHubDesktop2Chinese.exe"  
+      run: Invoke-WebRequest -Uri "https://github.com/Dong-learn9/GitHubDesktop2Chinese/releases/latest/download/GitHubDesktop2Chinese.exe" -OutFile "${{github.workspace}}\GitHubDesktop2Chinese.exe"  
 
     - name: Parse json_file,Read download url
       shell: pwsh

@@ -7,6 +7,12 @@ on:
     tags:
       - '*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如 v1.2.5)'
+        required: false
+        default: ''
+        type: string
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -32,10 +38,18 @@ jobs:
       with:
           default: v0.0.0 # Optional: Default version when tag not found
 
+    - name: Resolve version
+      id: version
+      shell: pwsh
+      run: |
+        $v = "${{ inputs.version }}"
+        if ($v -eq "") { $v = "${{ steps.tag.outputs.tag }}" }
+        echo "resolved=$v" >> $env:GITHUB_OUTPUT
+
     - name: Configure CMake x64
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: chcp 65001 && cmake -B ${{github.workspace}}/build -A x64 -DGitHubActions=1 -DFILE_VERSION="${{steps.tag.outputs.tag}}"
+      run: chcp 65001 && cmake -B ${{github.workspace}}/build -A x64 -DGitHubActions=1 -DFILE_VERSION="${{steps.version.outputs.resolved}}"
 
     - name: Build x64
       # Build your program with the given configuration
@@ -44,7 +58,7 @@ jobs:
     - name: Configure CMake x86
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: chcp 65001 && cmake -B ${{github.workspace}}/build32 -A Win32 -DGitHubActions=1 -DFILE_VERSION="${{steps.tag.outputs.tag}}"
+      run: chcp 65001 && cmake -B ${{github.workspace}}/build32 -A Win32 -DGitHubActions=1 -DFILE_VERSION="${{steps.version.outputs.resolved}}"
 
     - name: Build x86
       # Build your program with the given configuration
@@ -83,10 +97,18 @@ jobs:
         with:
             default: v0.0.0 # Optional: Default version when tag not found
 
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          $v = "${{ inputs.version }}"
+          if ($v -eq "") { $v = "${{ steps.tag.outputs.tag }}" }
+          echo "resolved=$v" >> $env:GITHUB_OUTPUT
+
       - name: env_isPrerelease
         shell: pwsh
         run: |
-            $isPrerelease = if("${{steps.tag.outputs.tag}}" -like "*beta*") { "true" } else { "false" }
+            $isPrerelease = if("${{steps.version.outputs.resolved}}" -like "*beta*") { "true" } else { "false" }
             Add-Content -Path $env:GITHUB_ENV -value "isPrerelease=$isPrerelease"
       - name: tree
         run: | 
@@ -99,7 +121,7 @@ jobs:
         with:
           #prerelease: false # 是否是预览版
           prerelease: ${{ env.isPrerelease }}
-          tag: ${{steps.tag.outputs.tag}}
+          tag: ${{steps.version.outputs.resolved}}
           bodyFile: "ReleaseBody.md"
           #name: 0
           artifacts: |
@@ -107,5 +129,5 @@ jobs:
             ./build/GitHubDesktop2Chinese/build32/Release/GitHubDesktop2Chinese_x86.exe
             ./json/localization.json
         env:
-          GITHUB_REPOSITORY: CNGEGE/GitHubDesktop2Chinese
+          GITHUB_REPOSITORY: Dong-learn9/GitHubDesktop2Chinese
           
