@@ -1,7 +1,11 @@
 ﻿# CMakeList.txt: GitHubDesktop2Chinese 的 CMake 项目，在此处包括源代码并定义
 # 项目特定的逻辑。
 #
-cmake_minimum_required (VERSION 3.30)
+cmake_minimum_required (VERSION 3.15)
+
+# 使用静态链接MSVC运行时(/MT)，避免依赖系统安装的VC++运行时版本导致ABI不兼容崩溃
+cmake_policy(SET CMP0091 NEW)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # 如果支持，请为 MSVC 编译器启用热重载。
 if (POLICY CMP0141)
